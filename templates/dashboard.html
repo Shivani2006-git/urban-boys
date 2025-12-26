@@ -10,17 +10,22 @@
     <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.28/build/spline-viewer.js"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         html {
             scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
+            padding: 0;
             font-family: 'Poppins', sans-serif;
             background: #000;
-            /* Fallback */
             color: white;
             overflow-x: hidden;
+            width: 100vw;
         }
 
         /* Optimized Fixed Background (GPU Accelerated) */
