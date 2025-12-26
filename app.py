@@ -8,10 +8,12 @@ app.secret_key = 'urban_boys_secret_key_change_this_later'
 # 1. Database connection
 # SUPABASE SETUP:
 # The password contains special characters (#, $, &) which must be URL-encoded for the connection string to work.
+# SUPABASE SETUP (Updated to use Transaction Pooler for IPv4 Support)
 raw_password = "#K9W5tSe#w$yZc&"
 encoded_password = quote_plus(raw_password)
 
-DB_URI = f"postgresql://postgres:{encoded_password}@db.gzgmaclzucnifunkkkgl.supabase.co:5432/postgres"
+# Using port 6543 and the pooler domain
+DB_URI = f"postgresql://postgres.gzgmaclzucnifunkkkgl:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 def get_db_connection():
     try:
