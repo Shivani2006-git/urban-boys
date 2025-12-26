@@ -1,76 +1,72 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import psycopg2
-from urllib.parse import quote_plus
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'urban_boys_secret_key_change_this_later'
 
-# 1. Database connection
-# SUPABASE SETUP:
-# The password contains special characters (#, $, &) which must be URL-encoded for the connection string to work.
-# SUPABASE SETUP (Updated to use Transaction Pooler for IPv4 Support)
-# SUPABASE SETUP (Updated with new password)
-raw_password = "San@1234fhdhdgdg"
-encoded_password = quote_plus(raw_password)
-
-# Using port 5432 (Session Pooler) - 'postgres' user with explicit project option
-DB_URI = f"postgresql://postgres:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?options=project%3Dgzgmaclzucnifunkkkgl"
+# 1. Database connection - SQLite (Local File)
+DB_NAME = "database.db"
 
 def get_db_connection():
     try:
-        conn = psycopg2.connect(DB_URI)
+        # check_same_thread=False is needed for Flask
+        conn = sqlite3.connect(DB_NAME, check_same_thread=False)
         return conn
     except Exception as e:
         print(f"❌ Connection Error: {e}")
         return None
 
 # Initialize tables
-try:
-    conn = get_db_connection()
-    if conn:
-        cursor = conn.cursor()
-        
-        # Products Table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS products (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                price DECIMAL(10, 2) NOT NULL,
-                description TEXT,
-                image_url VARCHAR(500)
-            )
-        """)
-        
-        # Users Table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL
-            )
-        """)
-        
-        # Admins Table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS admins (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL
-            )
-        """)
-        
-        # Check if default admin exists
-        cursor.execute("SELECT * FROM admins WHERE username = 'admin'")
-        if not cursor.fetchone():
-            cursor.execute("INSERT INTO admins (username, password) VALUES ('admin', 'admin123')")
-            print("✅ Default admin user created (admin/admin123)")
-        
-        conn.commit()
-        cursor.close()
-        conn.close()
-        print("✅ Tables checked/created!")
-except Exception as e:
-    print(f"❌ Initialization Error: {e}")
+def init_db():
+    try:
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
+            
+            # Products Table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS products (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name VARCHAR(255) NOT NULL,
+                    price DECIMAL(10, 2) NOT NULL,
+                    description TEXT,
+                    image_url VARCHAR(500)
+                )
+            """)
+            
+            # Users Table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username VARCHAR(255) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL
+                )
+            """)
+            
+            # Admins Table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS admins (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username VARCHAR(255) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL
+                )
+            """)
+            
+            # Check if default admin exists
+            cursor.execute("SELECT * FROM admins WHERE username = 'admin'")
+            if not cursor.fetchone():
+                cursor.execute("INSERT INTO admins (username, password) VALUES ('admin', 'admin123')")
+                print("✅ Default admin user created (admin/admin123)")
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print("✅ Tables checked/created!")
+    except Exception as e:
+        print(f"❌ Initialization Error: {e}")
+
+# Run init on startup
+init_db()
 
 @app.route('/')
 def home():
@@ -81,26 +77,26 @@ def save_user():
     user = request.form.get('username')
     passw = request.form.get('password')
     
-    # 'buffered=True' is not needed for Psycopg2
     try:
         conn = get_db_connection()
         if conn is None:
-            raise Exception("Connection returned None (check server logs)")
+            raise Exception("Connection returned None")
     except Exception as e:
         return f"❌ Database Connection Error: {str(e)}"
     
     try:
         cursor = conn.cursor() 
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (user, passw))
+        # SQLite uses ? for placeholders
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (user, passw))
         conn.commit()
         cursor.close()
         conn.close() 
     except Exception as e:
-        if "duplicate key" in str(e):
+        if "UNIQUE constraint failed" in str(e) or "duplicate" in str(e).lower():
             return render_template('index.html', error_msg="Username already taken!")
         return render_template('index.html', error_msg=f"Error: {e}")
     
-    # SUCCESS: Redirect to the actual dashboard route so products load correctly
+    # SUCCESS: Redirect to dashboard
     return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['POST'])
@@ -110,11 +106,11 @@ def login():
     
     conn = get_db_connection()
     if conn is None:
-        return "❌ Database Connection Failed. Please try again later."
+        return "❌ Database Connection Failed."
 
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (user_val, pass_val))
+        cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (user_val, pass_val))
         user = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -173,7 +169,7 @@ def admin_auth():
     if conn:
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM admins WHERE username = %s AND password = %s", (username, password))
+            cursor.execute("SELECT * FROM admins WHERE username = ? AND password = ?", (username, password))
             admin = cursor.fetchone()
             cursor.close()
             conn.close()
@@ -204,7 +200,7 @@ def admin():
         try:
             cursor = conn.cursor()
             cursor.execute("SELECT id, name, price, image_url FROM products ORDER BY id DESC")
-            products = cursor.fetchall() # Returns list of tuples
+            products = cursor.fetchall()
             cursor.close()
             conn.close()
         except Exception:
@@ -221,7 +217,7 @@ def delete_product(product_id):
     if conn:
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
+            cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
             conn.commit()
             cursor.close()
             conn.close()
@@ -245,10 +241,10 @@ def add_product():
         conn = get_db_connection()
         if conn is None:
             print("❌ Database Connection Failed when adding product.")
-            return redirect(url_for('admin')) # Or show error page
+            return redirect(url_for('admin'))
 
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO products (name, price, image_url, description) VALUES (%s, %s, %s, %s)", 
+        cursor.execute("INSERT INTO products (name, price, image_url, description) VALUES (?, ?, ?, ?)", 
                        (name, price, image_url, description))
         conn.commit()
         cursor.close()
@@ -261,4 +257,3 @@ def add_product():
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)
-
