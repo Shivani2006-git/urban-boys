@@ -12,8 +12,8 @@ app.secret_key = 'urban_boys_secret_key_change_this_later'
 raw_password = "#K9W5tSe#w$yZc&"
 encoded_password = quote_plus(raw_password)
 
-# Using port 6543 and the pooler domain
-DB_URI = f"postgresql://postgres.gzgmaclzucnifunkkkgl:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+# Using port 6543 and the pooler domain - trying standard 'postgres' user
+DB_URI = f"postgresql://postgres:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 def get_db_connection():
     try:
