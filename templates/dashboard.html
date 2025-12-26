@@ -251,6 +251,83 @@
             border-color: #7b61ff;
         }
 
+        /* --- MOBILE DASHBOARD FIX --- */
+        @media (max-width: 768px) {
+
+            /* Prevent horizontal scroll */
+            html,
+            body {
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            /* Adjust Hero Text */
+            .hero-text {
+                font-size: 32px;
+                max-width: 80%;
+                padding-left: 15px;
+            }
+
+            .hero-overlay {
+                padding-left: 20px;
+                height: 400px;
+                /* Shorter hero on mobile */
+            }
+
+            .hero-container {
+                height: 400px;
+            }
+
+            .content-spacer {
+                height: 350px;
+            }
+
+            /* Navbar Adjustments */
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            /* Product Grid: 2 Columns on Mobile */
+            .grid {
+                grid-template-columns: 1fr 1fr;
+                /* Force 2 columns */
+                gap: 15px;
+                padding: 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .card img {
+                height: 150px;
+                /* Smaller images */
+            }
+
+            .name {
+                font-size: 14px;
+            }
+
+            .price {
+                font-size: 16px;
+            }
+
+            /* Spline - Ensure it doesn't overflow */
+            spline-viewer {
+                width: 100%;
+                right: -20%;
+                /* Push it slightly off but keep visible */
+            }
+        }
+
         .wish-icon {
             position: absolute;
             top: 20px;
