@@ -158,7 +158,8 @@
             width: 100%;
             height: 600px;
             z-index: 0;
-            /* Behind navbar */
+            /* Behind n
+            avbar */
             overflow: hidden;
         }
 
@@ -542,33 +543,9 @@
             </div>
             {% endfor %}
             {% else %}
-            <!-- DEMO PRODUCTS -->
-            <div class="card">
-                <div class="wish-icon" onclick="toggleWish(this)">❤</div>
-                <img src="https://via.placeholder.com/300x300/333/fff?text=Silver+Chain">
-                <div class="info">
-                    <div class="name">Silver Cuban Chain</div>
-                    <div class="price">₹1,200</div>
-                    <button class="add-btn" onclick="addToCart(1200)">Add to Cart</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="wish-icon" onclick="toggleWish(this)">❤</div>
-                <img src="https://via.placeholder.com/300x300/333/fff?text=Gold+Ring">
-                <div class="info">
-                    <div class="name">Gold Signet Ring</div>
-                    <div class="price">₹3,500</div>
-                    <button class="add-btn" onclick="addToCart(3500)">Add to Cart</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="wish-icon" onclick="toggleWish(this)">❤</div>
-                <img src="https://via.placeholder.com/300x300/333/fff?text=Leather+Bracelet">
-                <div class="info">
-                    <div class="name">Braided Leather</div>
-                    <div class="price">₹850</div>
-                    <button class="add-btn" onclick="addToCart(850)">Add to Cart</button>
-                </div>
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #666;">
+                <h3>No products available.</h3>
+                <p>Login as Admin to add some!</p>
             </div>
             {% endif %}
 

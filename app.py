@@ -68,6 +68,33 @@ def init_db():
 # Run init on startup
 init_db()
 
+# --- AUTO-POPULATE DEMO PRODUCTS ---
+def seed_products():
+    try:
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM products")
+            if cursor.fetchone()[0] == 0:
+                # Add 6 demo products
+                items = [
+                    ("Pendant Chain", 500, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500"),
+                    ("Cuban Chain", 400, "https://images.unsplash.com/photo-1611085583191-a3b130a8b9f1?w=500"),
+                    ("Silver Ring", 250, "https://images.unsplash.com/photo-1605100804763-247f67b3fb41?w=500"),
+                    ("Leather Bracelet", 350, "https://images.unsplash.com/photo-1629224316160-974592274e70?w=500"),
+                    ("Stylish Bracelet", 200, "https://images.unsplash.com/photo-1611591678481-155b71944048?w=500"),
+                    ("Black Stone Ring", 150, "https://images.unsplash.com/photo-1616327047702-863776953063?w=500")
+                ]
+                cursor.executemany("INSERT INTO products (name, price, image_url) VALUES (?, ?, ?)", items)
+                conn.commit()
+                print("✅ Database pre-populated with 6 demo products.")
+            cursor.close()
+            conn.close()
+    except Exception as e:
+        print(f"❌ Error seeding products: {e}")
+
+seed_products()
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -96,7 +123,8 @@ def save_user():
             return render_template('index.html', error_msg="Username already taken!")
         return render_template('index.html', error_msg=f"Error: {e}")
     
-    # SUCCESS: Redirect to dashboard
+    # SUCCESS: Set session and redirect
+    session['username'] = user
     return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['POST'])
@@ -118,27 +146,14 @@ def login():
         return render_template('index.html', error_msg="Login failed due to system error.")
     
     if user:
-        # Fetch products for the dashboard
-        products = []
-        try:
-            conn = get_db_connection()
-            if conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT name, price, image_url FROM products ORDER BY id DESC")
-                products = cursor.fetchall()
-                cursor.close()
-                conn.close()
-        except Exception as e:
-            print(f"Error fetching products: {e}")
-
-        # This sends the user to your shop after successful login
-        return render_template('dashboard.html', username=user_val, products=products)
+        session['username'] = user_val
+        return redirect(url_for('dashboard'))
     else:
         return render_template('index.html', error_msg="Invalid credentials. Try again!")
 
 @app.route('/dashboard')
-@app.route('/dashboard')
 def dashboard():
+    username = session.get('username', 'Guest')
     # Fetch products for the dashboard
     products = []
     try:
@@ -152,7 +167,7 @@ def dashboard():
     except Exception as e:
         print(f"Error fetching products: {e}")
         
-    return render_template('dashboard.html', products=products)
+    return render_template('dashboard.html', username=username, products=products)
 
 # --- ADMIN ROUTES ---
 
@@ -221,9 +236,9 @@ def delete_product(product_id):
             conn.commit()
             cursor.close()
             conn.close()
-            print(f"✅ Product {product_id} deleted.")
+            flash(f"✅ Product {product_id} deleted successfully!", "success")
         except Exception as e:
-            print(f"❌ Error deleting product: {e}")
+            flash(f"❌ Error deleting product: {e}", "error")
             
     return redirect(url_for('admin'))
 
@@ -249,9 +264,9 @@ def add_product():
         conn.commit()
         cursor.close()
         conn.close()
-        print(f"✅ Product '{name}' added successfully!")
+        flash(f"✅ Product '{name}' added successfully!", "success")
     except Exception as e:
-        print(f"❌ Error adding product: {e}")
+        flash(f"❌ Error adding product: {e}", "error")
         
     return redirect(url_for('admin'))
 

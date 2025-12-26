@@ -164,6 +164,35 @@
             color: #777;
             margin-top: 50px;
         }
+
+        .flash-msg {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .flash-success {
+            background: #00ff88;
+            color: black;
+        }
+
+        .flash-error {
+            background: #ff4757;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                margin: 20px auto;
+            }
+
+            .navbar {
+                padding: 15px 20px;
+            }
+        }
     </style>
 </head>
 
@@ -175,6 +204,17 @@
     </div>
 
     <div class="container">
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div style="grid-column: 1/-1;">
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
 
         <!-- Left Side: Add Product Form -->
         <div class="form-section">
