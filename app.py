@@ -13,8 +13,8 @@ app.secret_key = 'urban_boys_secret_key_change_this_later'
 raw_password = "San@1234fhdhdgdg"
 encoded_password = quote_plus(raw_password)
 
-# Using port 6543 (Transaction Pooler) with full project username
-DB_URI = f"postgresql://postgres.gzgmaclzucnifunkkkgl:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+# Using port 6543 (Transaction Pooler) with explicit tenant reference option
+DB_URI = f"postgresql://postgres.gzgmaclzucnifunkkkgl:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?options=reference%3Dgzgmaclzucnifunkkkgl"
 
 def get_db_connection():
     try:
