@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin - Manage Products</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: white;
+            margin: 0;
+        }
+
+        .navbar {
+            background: #1f1f1f;
+            padding: 20px 50px;
+            border-bottom: 2px solid #00d2ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 24px;
+            color: white;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: #ff4757;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 20px;
+        }
+
+        .form-section,
+        .list-section {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #333;
+        }
+
+        h2 {
+            text-align: center;
+            color: #00d2ff;
+            margin-bottom: 20px;
+            margin-top: 0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #00d2ff;
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 12px;
+            background: #00d2ff;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .add-btn:hover {
+            background: #00b8e6;
+        }
+
+        /* Product List Styles */
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .p-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .p-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            object-fit: cover;
+            background: #333;
+        }
+
+        .p-name {
+            font-weight: bold;
+            color: #eee;
+        }
+
+        .p-price {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #ff6b81;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #777;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h1>URBAN BOYS ADMIN</h1>
+        <a href="/admin-logout" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="container">
+
+        <!-- Left Side: Add Product Form -->
+        <div class="form-section">
+            <h2>Add New Product</h2>
+            <form action="/add-product" method="POST">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" name="name" required placeholder="Ex: Silver Chain">
+                </div>
+
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" name="price" required placeholder="Ex: 499">
+                </div>
+
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" name="image_url" placeholder="Paste image link here">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="Product details..."></textarea>
+                </div>
+
+                <button type="submit" class="add-btn">Add Product</button>
+            </form>
+        </div>
+
+        <!-- Right Side: Delete Products List -->
+        <div class="list-section">
+            <h2>Manage Products</h2>
+            {% if products %}
+            {% for product in products %}
+            <div class="product-item">
+                <div class="p-info">
+                    <!-- product[3] is image_url, product[1] is name, product[2] is price -->
+                    <img src="{{ product[3] or 'https://via.placeholder.com/40' }}" class="p-img">
+                    <div>
+                        <div class="p-name">{{ product[1] }}</div>
+                        <div class="p-price">₹{{ product[2] }}</div>
+                    </div>
+                </div>
+                <!-- product[0] is id -->
+                <a href="/delete-product/{{ product[0] }}" class="delete-btn"
+                    onclick="return confirm('Are you sure you want to delete this?')">Delete</a>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-msg">No products found.</div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</body>
+
+</html>

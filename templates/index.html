@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Clone - Login</title>
+    <!-- Three.js for 3D Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GLTFLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Modern Dark Theme - Split Card Design */
+        :root {
+            --bg-color: #2b2b36;
+            --card-bg: #1e1e24;
+            --accent-color: #7b61ff;
+            --text-color: #ffffff;
+            --text-muted: #8b8b99;
+            --input-bg: #2b2b36;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 50%, #363645 0%, #2b2b36 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        /* The Main Card Container */
+        .card-wrapper {
+            display: flex;
+            width: 1000px;
+            height: 680px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: popIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* LEFT SIDE: Visual/3D Area */
+        .visual-side {
+            width: 45%;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a20 0%, #0f0f15 100%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        #watch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            pointer-events: none;
+        }
+
+        .visual-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .visual-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .dots {
+            display: flex;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 30px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .dot.active {
+            background: white;
+        }
+
+        /* RIGHT SIDE: Form Area */
+        .form-side {
+            width: 55%;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .brand-logo {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        #form-content {
+            margin: auto 0;
+            width: 100%;
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+            color: white;
+        }
+
+        .sub-text {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .sub-text a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border-radius: 8px;
+            background: var(--input-bg);
+            border: 1px solid transparent;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            background: #32323e;
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #555560;
+        }
+
+        .row-inputs {
+            display: flex;
+            gap: 20px;
+        }
+
+        button.primary-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        button.primary-btn:hover {
+            background: #6a51e6;
+            transform: translateY(-1px);
+        }
+
+        .social-login {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: transparent;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #555;
+        }
+
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card-wrapper">
+        <!-- LEFT PANEL: 3D Ornament -->
+        <div class="visual-side">
+            <div id="watch-canvas"></div>
+
+            <div class="visual-content">
+                <div class="visual-title">Capturing Style, <br>Creating Legacy.</div>
+                <div class="visual-subtitle">Premium accessories for the modern gentleman.</div>
+                <div class="dots">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Login Form -->
+        <div class="form-side">
+            <div class="brand-logo">URBAN BOYS</div>
+
+            <div id="form-content">
+                <h2 id="title">Create an account</h2>
+                <div class="sub-text">
+                    <span id="sub-msg">Already have an account?</span>
+                    <a class="toggle-link" onclick="toggleForm()">Log in</a>
+                </div>
+
+                {% if error_msg %}
+                <div class="error-message">
+                    {{ error_msg }}
+                </div>
+                {% endif %}
+
+                <form action="/save-user" method="POST">
+                    <div class="row-inputs">
+                        <div class="input-group" style="width: 50%;">
+                            <label>Username</label>
+                            <input type="text" name="username" placeholder="Fletcher" required>
+                        </div>
+                        <div class="input-group" style="width: 50%;">
+                            <label>Last Name</label>
+                            <input type="text" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="example@gmail.com">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Enter your password" required>
+                    </div>
+
+                    <button type="submit" class="primary-btn" id="btn-text">Create account</button>
+
+                    <div style="margin-top: 15px;">
+                        <a href="/admin-login" style="
+                            display: block;
+                            width: 100%;
+                            padding: 14px;
+                            text-align: center;
+                            border: 1px solid var(--accent-color);
+                            border-radius: 8px;
+                            color: var(--accent-color);
+                            text-decoration: none;
+                            font-weight: 600;
+                            font-size: 14px;
+                            transition: 0.2s;
+                            box-sizing: border-box;
+                        " onmouseover="this.style.background='rgba(123, 97, 255, 0.1)'"
+                            onmouseout="this.style.background='transparent'">
+                            Admin Login
+                        </a>
+                    </div>
+                </form>
+
+                <div style="margin-top: 20px; text-align: center; color: #555; font-size: 12px; margin-bottom: 10px;">Or
+                    register with</div>
+
+                <div class="social-login">
+                    <button class="social-btn">Google</button>
+                    <button class="social-btn">Apple</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 3D IMPORTED MODEL LOADER CODE
+        // ============================================
+
+        let canvas, renderer, scene, camera;
+        let loadedModel, mixer;
+        let mouseX = 0, mouseY = 0;
+        const clock = new THREE.Clock();
+
+        function init3DScene() {
+            canvas = document.getElementById('watch-canvas');
+            const container = document.querySelector('.visual-side');
+
+            renderer = new THREE.WebGLRenderer({
+                alpha: true,
+                antialias: true,
+                powerPreference: "high-performance"
+            });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.physicallyCorrectLights = true;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+            canvas.appendChild(renderer.domElement);
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(40, container.offsetWidth / container.offsetHeight, 0.1, 100);
+            camera.position.set(0, 0, 8);
+
+            // Lighting Setup
+            const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambient);
+
+            const mainLight = new THREE.SpotLight(0xffedd5, 12);
+            mainLight.position.set(5, 5, 10);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+
+            const rimLight = new THREE.SpotLight(0x7b61ff, 8);
+            rimLight.position.set(-5, 2, -5);
+            scene.add(rimLight);
+
+            const fillLight = new THREE.PointLight(0xffaa55, 3);
+            fillLight.position.set(2, -3, 3);
+            scene.add(fillLight);
+
+            // Env Map
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            const envScene = new THREE.Scene();
+            const lightStrip = new THREE.Mesh(new THREE.PlaneGeometry(10, 2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            lightStrip.position.set(0, 5, 5);
+            lightStrip.lookAt(0, 0, 0);
+            envScene.add(lightStrip);
+            scene.environment = pmremGenerator.fromScene(envScene).texture;
+
+
+            // ==========================================
+            // LOAD THE MODEL
+            // ==========================================
+            const loader = new THREE.GLTFLoader();
+            // IMPORTANT: Place your file at /static/watch.glb
+            const modelPath = '/static/watch.glb';
+
+            console.log("Loading model from:", modelPath);
+
+            loader.load(modelPath, function (gltf) {
+                loadedModel = gltf.scene;
+
+                // Auto-center and Scale
+                const box = new THREE.Box3().setFromObject(loadedModel);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+
+                // Centering
+                loadedModel.position.x += (loadedModel.position.x - center.x);
+                loadedModel.position.y += (loadedModel.position.y - center.y);
+                loadedModel.position.z += (loadedModel.position.z - center.z);
+
+                // Scaling: Fit into a 4x4x4 box roughly
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 4.0 / maxDim;
+                loadedModel.scale.set(scale, scale, scale);
+
+                // Initial Rotation
+                loadedModel.rotation.y = -Math.PI / 4;
+                loadedModel.rotation.x = 0.2;
+
+                scene.add(loadedModel);
+
+                // Animation Mixer
+                if (gltf.animations && gltf.animations.length) {
+                    mixer = new THREE.AnimationMixer(loadedModel);
+                    gltf.animations.forEach((clip) => {
+                        mixer.clipAction(clip).play();
+                    });
+                } else {
+                    // Try to animate parts if recognized (optional fallback)
+                }
+
+                // Remove loading text if any
+                const loadingText = document.getElementById('loading-text');
+                if (loadingText) loadingText.remove();
+
+            },
+                // Progress
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                // Error
+                function (error) {
+                    console.error('An error happened', error);
+
+                    // Create a visible error/placeholder on canvas so user knows to upload file
+                    const ctx = canvas.querySelector('canvas').getContext('webgl2'); // Just checking access
+                    // Add text overlay
+                    const msg = document.createElement('div');
+                    msg.id = 'loading-text';
+                    msg.innerText = "Please upload 'watch.glb' to /static/ folder";
+                    msg.style.position = 'absolute';
+                    msg.style.top = '50%';
+                    msg.style.left = '0';
+                    msg.style.width = '100%';
+                    msg.style.textAlign = 'center';
+                    msg.style.color = 'white';
+                    msg.style.fontFamily = 'sans-serif';
+                    msg.style.pointerEvents = 'none';
+                    canvas.appendChild(msg);
+                });
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            if (mixer) mixer.update(delta);
+
+            // Mouse Interactive Rotation
+            const targetY = mouseX * 0.5;
+            const targetX = mouseY * 0.5;
+
+            if (loadedModel) {
+                loadedModel.rotation.y += 0.05 * (targetY - loadedModel.rotation.y);
+                loadedModel.rotation.x += 0.05 * (targetX - loadedModel.rotation.x);
+
+                // Float
+                loadedModel.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('load', init3DScene);
+        window.addEventListener('resize', () => {
+            const container = document.querySelector('.visual-side');
+            if (container && renderer) {
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            }
+        });
+
+        document.addEventListener('mousemove', e => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Form Logic
+        let isLogin = false;
+        function toggleForm() {
+            const title = document.getElementById('title');
+            const subMsg = document.getElementById('sub-msg');
+            const toggleBtn = document.querySelector('.toggle-link');
+            const btnText = document.getElementById('btn-text');
+            const form = document.querySelector('form');
+
+            if (!isLogin) {
+                // Switch to Login
+                title.innerText = "Welcome back";
+                subMsg.innerText = "Don't have an account?";
+                toggleBtn.innerText = "Sign up";
+                btnText.innerText = "Log in";
+                form.action = "/login";
+            } else {
+                // Switch to Sign Up
+                title.innerText = "Create an account";
+                subMsg.innerText = "Already have an account?";
+                toggleBtn.innerText = "Log in";
+                btnText.innerText = "Create account";
+                form.action = "/save-user";
+            }
+            isLogin = !isLogin;
+        }
+
+    </script>
+</body>
+
+</html>
